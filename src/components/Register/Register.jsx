@@ -1,41 +1,47 @@
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
 import auth from '../../firebase/firebase.config';
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Register = () => {
 
-    const [registerError , setRegisterError] = useState('');
-    const [success , setSuccess] = useState('')
+    const [registerError, setRegisterError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [showPassword, setShowPassword] = useState(false)
 
     const handleRegister = e => {
         e.preventDefault();
         const email = e.target.email.value;
         const password = e.target.password.value;
-        console.log(email,password);
+        console.log(email, password);
 
         //reset error
         setRegisterError('');
         setSuccess('');
 
-        
 
-        if(password.length , 6){
+
+        if (password.length < 6) {
             setRegisterError('Password Should be at least 6 characters or longer');
             return;
         }
+        else if (!/[A-Z]/.test(password)) {
+            setRegisterError('Password should contain at least one uppercase letter');
+            return;
+        }
 
-        
+
 
         // create user
-        createUserWithEmailAndPassword(auth,email,password)
-        .then(result =>{
-            console.log(result.user);
-            setSuccess("User Create Successfully.");
-        })
-        .catch(error => {
-             console.log(error);
-             setRegisterError(error.message)
-        })
+        createUserWithEmailAndPassword(auth, email, password)
+            .then(result => {
+                console.log(result.user);
+                setSuccess("User Create Successfully.");
+            })
+            .catch(error => {
+                console.log(error);
+                setRegisterError(error.message)
+            })
 
     }
 
@@ -46,7 +52,18 @@ const Register = () => {
                 <form onSubmit={handleRegister}>
                     <input className='mb-4 w-3/4 py-2 px-4' type="email" name='email' placeholder='Email Address' required />
                     <br />
-                    <input className='mb-4 w-3/4 py-2 px-4' type="password" name='password' placeholder='Password' required />
+                    <input className='mb-4 w-3/4 py-2 px-4'
+                        type={showPassword ? "text" : "password"}
+                        name='password'
+                        placeholder='Password'
+                        required />
+                    <span onClick={() => setShowPassword(!showPassword)}>
+
+                        {
+                            showPassword ? <FaEyeSlash /> : <FaEye />
+                        }
+
+                    </span>
                     <br />
                     <input className='mb-4 w-3/4 btn btn-secondary' type="submit" value='Register' />
                 </form>
