@@ -1,7 +1,8 @@
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
 import React, { useState } from 'react';
 import auth from '../../firebase/firebase.config';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Link } from 'react-router-dom';
 
 const Register = () => {
 
@@ -11,12 +12,13 @@ const Register = () => {
 
     const handleRegister = e => {
         e.preventDefault();
+        const name = e.target.name.value;
         const email = e.target.email.value;
         const password = e.target.password.value;
         const accepted = e.target.terms.checked;
-        console.log(email, password,accepted);
+        console.log(name, email, password, accepted);
 
-        //reset error
+        //reset error and success
         setRegisterError('');
         setSuccess('');
 
@@ -30,7 +32,7 @@ const Register = () => {
             setRegisterError('Password should contain at least one uppercase letter');
             return;
         }
-        else if (!accepted){
+        else if (!accepted) {
             setRegisterError('You must accept the terms and conditions');
             return;
         }
@@ -42,6 +44,20 @@ const Register = () => {
             .then(result => {
                 console.log(result.user);
                 setSuccess("User Create Successfully.");
+
+                //update profile
+                updateProfile(result.user, {
+                    displayName: name,
+                    photoURL: 'https://i.pravatar.cc/150?img=1'
+                })
+                    .then(() => console.log('profile updated'))
+                    .catch(err => console.log(err));
+
+                // send varification email:
+                sendEmailVerification(result.user)
+                    .then(() => {
+                        alert("Please Check Your email And varifications Your Account")
+                    })
             })
             .catch(error => {
                 console.log(error);
@@ -55,6 +71,8 @@ const Register = () => {
             <div className='mx-auto md:w-1/2'>
                 <h2 className='text-3xl mb-8'> Please Register </h2>
                 <form onSubmit={handleRegister}>
+                    <input className='mb-4 w-full py-2 px-4' type="text" name='name' placeholder='Your Name' required />
+                    <br />
                     <input className='mb-4 w-full py-2 px-4' type="email" name='email' placeholder='Email Address' required />
                     <br />
                     <div className='relative mb-4'>
@@ -86,6 +104,7 @@ const Register = () => {
                 {
                     success && <p className='text-green-500'>{success}</p>
                 }
+                <p>Already  have an account <Link to="/login">Login</Link> </p>
             </div>
         </div>
     );
